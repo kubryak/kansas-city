@@ -28,7 +28,16 @@ import {
 
 export default function CharacterPage() {
   const params = useParams();
-  const characterName = params.name as string;
+  // Next.js должен декодировать параметры URL, но на всякий случай декодируем явно
+  // если имя уже закодировано
+  let characterName = params.name as string;
+  try {
+    if (characterName.includes('%')) {
+      characterName = decodeURIComponent(characterName)
+    }
+  } catch (e) {
+    // Если декодирование не удалось, используем исходное имя
+  }
   const {
     character,
     equipments,

@@ -94,7 +94,11 @@ export function useCharacter (name: string): UseCharacterResult {
 		queryKey: ['character', name],
 		queryFn: async () => {
 			// Делаем запрос напрямую к Sirus API с клиента
-			const rawData = await fetchSirusAPI<unknown>(SIRUS_API.character(name))
+			// Логируем для отладки проблем с кириллицей
+			console.log('Fetching character:', name)
+			const apiUrl = SIRUS_API.character(name)
+			console.log('API URL:', apiUrl)
+			const rawData = await fetchSirusAPI<unknown>(apiUrl)
 			// Валидируем данные - используем passthrough для гибкости
 			// Типизируем как CharacterResponse, так как схема может быть неполной
 			return rawData as CharacterResponse

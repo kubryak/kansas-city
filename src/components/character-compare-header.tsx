@@ -105,7 +105,7 @@ export function CharacterCompareHeader({
 						</div>
 					)}
 					<div>
-						<Link href={`/character/${character1.name}`} className="inline-block">
+						<Link href={`/character/${encodeURIComponent(character1.name)}`} className="inline-block">
 							<h3 className={`text-2xl font-bold ${classColor1} hover:underline cursor-pointer`}>
 								{character1.name}
 							</h3>
@@ -165,7 +165,7 @@ export function CharacterCompareHeader({
 				{/* Второй персонаж */}
 				<div className="flex items-start gap-6 justify-end">
 					<div className="text-right">
-						<Link href={`/character/${character2.name}`} className="inline-block">
+						<Link href={`/character/${encodeURIComponent(character2.name)}`} className="inline-block">
 							<h3 className={`text-2xl font-bold ${classColor2} hover:underline cursor-pointer`}>
 								{character2.name}
 							</h3>

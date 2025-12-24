@@ -276,7 +276,7 @@ export function MembersTable ({ members, rankById }: MembersTableProps) {
 										)}`}
 									>
 										<Link
-											href={`/character/${member.name}`}
+											href={`/character/${encodeURIComponent(member.name)}`}
 											className='hover:underline'
 										>
 											{member.name}

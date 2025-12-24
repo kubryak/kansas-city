@@ -10,7 +10,21 @@ const SIRUS_API_BASE_URL = 'https://api.sirus.su/api/base'
 
 export const SIRUS_API = {
 	guild: `${SIRUS_BASE_URL}/${REALM_ID}/guild/${GUILD_ID}`,
-	character: (name: string) => `${SIRUS_BASE_URL}/${REALM_ID}/character/${encodeURIComponent(name)}`,
+	character: (name: string) => {
+		// Next.js может передать имя уже закодированным, поэтому декодируем перед повторным кодированием
+		// Проверяем, закодировано ли имя (содержит ли %)
+		let decodedName = name
+		try {
+			// Если имя содержит закодированные символы, декодируем его
+			if (name.includes('%')) {
+				decodedName = decodeURIComponent(name)
+			}
+		} catch (e) {
+			// Если декодирование не удалось, используем исходное имя
+			decodedName = name
+		}
+		return `${SIRUS_BASE_URL}/${REALM_ID}/character/${encodeURIComponent(decodedName)}`
+	},
 	latestKills: (params?: URLSearchParams) => {
 		const url = `${SIRUS_BASE_URL}/${REALM_ID}/progression/pve/latest-boss-kills?guild=${GUILD_ID}`
 		return params ? `${url}&${params.toString()}` : url
