@@ -20,13 +20,8 @@ export function SpellName ({ spellId, fallback }: SpellNameProps) {
 		queryKey: ['spell', spellId],
 		queryFn: async () => {
 			try {
-				const res = await fetch(`/api/tooltip/spell/${spellId}`)
-
-				if (!res.ok) {
-					return {}
-				}
-
-				return res.json()
+				const { fetchSirusAPI, SIRUS_API } = await import('@/lib/sirus-api')
+				return await fetchSirusAPI(SIRUS_API.spellTooltip(spellId))
 			} catch {
 				return {}
 			}

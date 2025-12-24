@@ -301,15 +301,8 @@ export function CharacterCompareEquipment({
 					return null
 				}
 
-				const res = await fetch(
-					`/api/tooltip/item/${item.entry}?guid=${characterGuid}`,
-				)
-
-				if (!res.ok) {
-					throw new Error('Failed to fetch item tooltip')
-				}
-
-				return await res.json() as ItemTooltipData
+				const { fetchSirusAPI, SIRUS_API } = await import('@/lib/sirus-api')
+				return await fetchSirusAPI(SIRUS_API.itemTooltip(item.entry, characterGuid)) as ItemTooltipData
 			}
 
 			const newItemsData = new Map<string, {

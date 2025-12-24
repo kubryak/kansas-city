@@ -319,16 +319,9 @@ export function ItemTooltip ({ itemId, children, characterGuid, pinned = false, 
 	const { data, isLoading } = useQuery<ItemTooltipData>({
 		queryKey: ['item-tooltip', itemId, characterGuid],
 		queryFn: async () => {
-			const url = characterGuid
-				? `/api/tooltip/item/${itemId}?guid=${characterGuid}`
-				: `/api/tooltip/item/${itemId}?guid=`
-			const res = await fetch(url)
-
-			if (!res.ok) {
-				throw new Error('Failed to fetch item tooltip')
-			}
-
-			return res.json()
+			const { fetchSirusAPI, SIRUS_API } = await import('@/lib/sirus-api')
+			const url = SIRUS_API.itemTooltip(itemId, characterGuid ?? undefined)
+			return fetchSirusAPI(url)
 		},
 		enabled: !!itemId && (isHovered || pinned),
 	})

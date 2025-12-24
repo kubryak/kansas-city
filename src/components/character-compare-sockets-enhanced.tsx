@@ -285,15 +285,8 @@ export function CharacterCompareSocketsEnhanced({
 						return { sockets: [] as SocketType[], itemset: null as any }
 					}
 
-					const res = await fetch(
-						`/api/tooltip/item/${item.entry}?guid=${characterGuid}`,
-					)
-
-					if (!res.ok) {
-						throw new Error('Failed to fetch item tooltip')
-					}
-
-					const data = await res.json() as any
+					const { fetchSirusAPI, SIRUS_API } = await import('@/lib/sirus-api')
+					const data = await fetchSirusAPI(SIRUS_API.itemTooltip(item.entry, characterGuid)) as any
 					const sockets = data?.item?.sockets as SocketType[] | undefined
 					const itemset = data?.item?.itemset_data as {
 						id?: number

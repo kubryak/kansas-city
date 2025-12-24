@@ -209,9 +209,8 @@ function GlyphTooltip ({ name, itemEntry, children }: GlyphTooltipProps) {
 		queryFn: async () => {
 			if (!itemEntry) return {}
 			try {
-				const res = await fetch(`/api/tooltip/item/${itemEntry}`)
-				if (!res.ok) return {}
-				return res.json()
+				const { fetchSirusAPI, SIRUS_API } = await import('@/lib/sirus-api')
+				return await fetchSirusAPI(SIRUS_API.itemTooltip(itemEntry))
 			} catch {
 				return {}
 			}

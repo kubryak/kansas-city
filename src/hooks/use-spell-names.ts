@@ -32,21 +32,9 @@ export function useSpellNames (spellIds: Array<string | number>) {
 				return []
 			}
 
-			// Формируем URL с параметрами ids[]
-			const url = new URL('/api/tooltip/spell/many', window.location.origin)
-			url.searchParams.set('lang', 'ru')
-			for (const id of uniqueIds) {
-				url.searchParams.append('ids[]', id.toString())
-			}
-
-			const res = await fetch(url.toString())
-
-			if (!res.ok) {
-				console.error('Failed to fetch spells:', res.status, res.statusText)
-				return []
-			}
-
-			const response = await res.json()
+			const { fetchSirusAPI, SIRUS_API } = await import('@/lib/sirus-api')
+			const url = SIRUS_API.spellTooltipMany(uniqueIds, 'ru')
+			const response = await fetchSirusAPI(url)
 			
 			// API возвращает объект с полем data, содержащим массив
 			const data = Array.isArray(response) ? response : (response?.data || [])

@@ -6,6 +6,7 @@
 const REALM_ID = 22
 const GUILD_ID = 39104
 const SIRUS_BASE_URL = 'https://sirus.su/api/base'
+const SIRUS_API_BASE_URL = 'https://api.sirus.su/api/base'
 
 export const SIRUS_API = {
 	guild: `${SIRUS_BASE_URL}/${REALM_ID}/guild/${GUILD_ID}`,
@@ -15,12 +16,28 @@ export const SIRUS_API = {
 		return params ? `${url}&${params.toString()}` : url
 	},
 	pveInfo: `${SIRUS_BASE_URL}/${REALM_ID}/pve-info?encounters=true`,
-	itemTooltip: (itemId: number, guid?: number) => {
-		const url = `${SIRUS_BASE_URL}/${REALM_ID}/tooltip/item/${itemId}`
-		return guid ? `${url}?guid=${guid}` : url
+	progression: `${SIRUS_BASE_URL}/${REALM_ID}/progression/pve/latest-boss-kills?guild=${GUILD_ID}&page=1`,
+	itemTooltip: (itemId: number | string, guid?: number | string) => {
+		// Формат: /tooltip/item/{id}/{guid}?lang=ru&guid или /tooltip/item/{id}/?lang=ru
+		if (guid) {
+			return `${SIRUS_API_BASE_URL}/${REALM_ID}/tooltip/item/${itemId}/${guid}?lang=ru&guid`
+		}
+		return `${SIRUS_API_BASE_URL}/${REALM_ID}/tooltip/item/${itemId}/?lang=ru`
 	},
-	spellTooltip: (spellId: number) => `${SIRUS_BASE_URL}/${REALM_ID}/tooltip/spell/${spellId}`,
-	bossfight: (id: number) => `${SIRUS_BASE_URL}/${REALM_ID}/bossfight/${id}`,
+	spellTooltip: (spellId: number | string, guid?: number | string) => {
+		const url = `${SIRUS_API_BASE_URL}/${REALM_ID}/tooltip/spell/${spellId}/?lang=ru`
+		return guid ? `${url}&guid=${guid}` : url
+	},
+	spellTooltipMany: (ids: Array<string | number>, lang = 'ru') => {
+		const url = new URL(`${SIRUS_API_BASE_URL}/${REALM_ID}/tooltip/spell/many`)
+		url.searchParams.set('lang', lang)
+		for (const id of ids) {
+			url.searchParams.append('ids[]', String(id))
+		}
+		return url.toString()
+	},
+	bossfight: (id: number | string) => `${SIRUS_BASE_URL}/${REALM_ID}/details/bossfight/${id}`,
+	bossfightCombatlog: (id: number | string) => `${SIRUS_BASE_URL}/${REALM_ID}/details/bossfight/${id}/combatlog`,
 }
 
 /**

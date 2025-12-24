@@ -39,13 +39,8 @@ export function ProgressWidget () {
 	const { data, isLoading, isError } = useQuery<ProgressResponse>({
 		queryKey: ['progression'],
 		queryFn: async () => {
-			const res = await fetch('/api/progression')
-
-			if (!res.ok) {
-				throw new Error('Failed to fetch progression')
-			}
-
-			return res.json()
+			const { fetchProgression } = await import('@/lib/sirus-api-helpers')
+			return await fetchProgression()
 		},
 	})
 

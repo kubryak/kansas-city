@@ -986,13 +986,30 @@ export default function BossfightPage () {
 	const { data, isLoading, isError } = useQuery<BossfightResponse>({
 		queryKey: ['bossfight', id],
 		queryFn: async () => {
-			const res = await fetch(`/api/bossfight/${id}`)
-
-			if (!res.ok) {
-				throw new Error('Failed to fetch bossfight details')
-			}
-
-			return res.json()
+			const { fetchSirusAPI, SIRUS_API } = await import('@/lib/sirus-api')
+			const [details, combatlog] = await Promise.all([
+				fetchSirusAPI<BossfightDetails>(SIRUS_API.bossfight(id)).catch(() => null),
+				fetchSirusAPI<CombatlogData>(SIRUS_API.bossfightCombatlog(id)).catch(() => null),
+			])
+			return {
+				details: details ?? {
+					data: {
+						boss_name: '',
+						map_name: '',
+						achievements: [],
+						loots: [],
+						attempts: 0,
+						difficulty: 0,
+						guild: { id: 0, name: '', level: 0 },
+						killed_at: '',
+						fight_length: '',
+						players: [],
+					},
+					order: 0,
+					encounter: 0,
+				},
+				combatlog: combatlog ?? null,
+			} as BossfightResponse
 		},
 	})
 

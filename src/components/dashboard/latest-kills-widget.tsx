@@ -92,13 +92,13 @@ export function LatestKillsWidget () {
 			if (selectedBossId !== null) {
 				params.set('boss', String(selectedBossId))
 			}
-			const res = await fetch(`/api/latest-kills?${params.toString()}`)
-
-			if (!res.ok) {
-				throw new Error('Failed to fetch latest kills')
-			}
-
-			return res.json()
+			const { fetchLatestKills } = await import('@/lib/sirus-api-helpers')
+			return await fetchLatestKills({
+				period: period as any,
+				page,
+				raidIndex: selectedRaidIndex,
+				bossId: selectedBossId,
+			})
 		},
 	})
 
