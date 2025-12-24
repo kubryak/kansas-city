@@ -34,10 +34,10 @@ export function useSpellNames (spellIds: Array<string | number>) {
 
 			const { fetchSirusAPI, SIRUS_API } = await import('@/lib/sirus-api')
 			const url = SIRUS_API.spellTooltipMany(uniqueIds, 'ru')
-			const response = await fetchSirusAPI(url)
+			const response = await fetchSirusAPI<SpellData[] | { data: SpellData[] }>(url)
 			
 			// API возвращает объект с полем data, содержащим массив
-			const data = Array.isArray(response) ? response : (response?.data || [])
+			const data = Array.isArray(response) ? response : (('data' in response && Array.isArray(response.data)) ? response.data : [])
 			
 			// Убеждаемся, что возвращаем массив
 			if (!Array.isArray(data)) {
