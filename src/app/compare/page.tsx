@@ -3,9 +3,9 @@
 import React from 'react'
 import { useCharacter } from '@/hooks/use-character'
 import { CharacterCompareForm } from '@/components/character-compare-form'
-import { CharacterCompareStats } from '@/components/character-compare-stats'
+import { CharacterCompareStats, type Stats } from '@/components/character-compare-stats'
 import { CharacterCompareEquipment } from '@/components/character-compare-equipment'
-import { CharacterCompareTalents } from '@/components/character-compare-talents'
+import { CharacterCompareTalents, type ClassTalent } from '@/components/character-compare-talents'
 import { CharacterCompareSocketsEnhanced } from '@/components/character-compare-sockets-enhanced'
 import { CharacterCompareHeader } from '@/components/character-compare-header'
 import Link from 'next/link'
@@ -35,8 +35,8 @@ export default function ComparePage() {
 		isError: isError2,
 	} = useCharacter(character2Name)
 
-	const stats1 = character1?.stats
-	const stats2 = character2?.stats
+	const stats1 = character1?.stats as Stats | null | undefined
+	const stats2 = character2?.stats as Stats | null | undefined
 
 	const handleCompare = (name1: string, name2: string) => {
 		setCharacter1Name(name1)
@@ -115,8 +115,8 @@ export default function ComparePage() {
 					/>
 
 					<CharacterCompareTalents
-						classTalents1={classTalents1}
-						classTalents2={classTalents2}
+						classTalents1={classTalents1 as ClassTalent[] | null}
+						classTalents2={classTalents2 as ClassTalent[] | null}
 						glyphs1={glyphs1}
 						glyphs2={glyphs2}
 						talents1={talents1}

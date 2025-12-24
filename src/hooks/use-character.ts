@@ -78,9 +78,9 @@ interface UseCharacterResult {
 	isLoading: boolean
 	isError: boolean
 	character: CharacterResponse['character'] | null
-	equipments: CharacterResponse['equipments']
-	professions: CharacterResponse['professions']
-	secondarySkills: CharacterResponse['secondarySkills']
+	equipments: CharacterResponse['equipments'] | null
+	professions: CharacterResponse['professions'] | null
+	secondarySkills: CharacterResponse['secondarySkills'] | null
 	talents: Talent[][] | null
 	activeTalentGroup: number | null
 	classTalents: ClassTalent[] | null

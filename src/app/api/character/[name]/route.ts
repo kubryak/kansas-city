@@ -92,7 +92,7 @@ export async function GET (
 			return NextResponse.json(
 				{
 					error: 'Invalid character data structure',
-					details: err.errors,
+					details: err.issues,
 				},
 				{ status: 500 },
 			)

@@ -52,7 +52,7 @@ function parseWowText (text: string | null | undefined): string {
 
 interface CharacterSocketsSummaryProps {
 	characterGuid: number
-	equipments: Array<EquipmentItem> | null
+	equipments: Array<EquipmentItem> | null | undefined
 }
 
 interface GemSummaryItem {

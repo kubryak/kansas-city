@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-interface Stats {
+export interface Stats {
 	strength?: number
 	agility?: number
 	stamina?: number
@@ -65,6 +65,17 @@ function getStatDifference(value1: number | undefined, value2: number | undefine
 	}
 }
 
+type StatItem = {
+	key: keyof Stats
+	label: string
+	isPercentage?: boolean
+}
+
+type StatGroup = {
+	title: string
+	stats: StatItem[]
+}
+
 export function CharacterCompareStats({
 	stats1,
 	stats2,
@@ -77,7 +88,7 @@ export function CharacterCompareStats({
 		return null
 	}
 
-	const statGroups = [
+	const statGroups: StatGroup[] = [
 		{
 			title: 'Основные характеристики',
 			stats: [

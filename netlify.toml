@@ -9,3 +9,7 @@
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
 
+[functions]
+  node_bundler = "esbuild"
+  included_files = [".next/**"]
+

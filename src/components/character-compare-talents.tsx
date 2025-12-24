@@ -5,12 +5,12 @@ import { useQuery } from '@tanstack/react-query'
 import { SafeImage } from '@/components/safe-image'
 import { getSpecName, getSpecIcon, getClassColor } from '@/utils/character-meta'
 
-interface RankSpell {
+export interface RankSpell {
 	spell_id: number
-	class: number
-	spec: number
+	class?: number
+	spec?: number
 	name: string
-	range: {
+	range?: {
 		rangeID: number
 		rangeMin: number
 		rangeMinFriendly: number
@@ -19,22 +19,22 @@ interface RankSpell {
 		name: string
 	}
 	description: string
-	power_type: number
-	power_cost: number | null
-	power_cost_runes: number
-	power_cost_percent: number | null
-	power_cost_per_level: number
-	power_per_second: number | null
-	cast_time: number
+	power_type?: number
+	power_cost?: number | null
+	power_cost_runes?: number
+	power_cost_percent?: number | null
+	power_cost_per_level?: number
+	power_per_second?: number | null
+	cast_time?: number
 	icon: string
-	modifies: Array<{
+	modifies?: Array<{
 		id: number
 		name: string
 		icon: string
 	}>
 }
 
-interface Talent {
+export interface Talent {
 	id: number
 	col: number
 	row: number
@@ -46,7 +46,7 @@ interface Talent {
 	max_rank: number
 }
 
-interface ClassTalent {
+export interface ClassTalent {
 	_id: number
 	name: string
 	order: number
@@ -56,7 +56,7 @@ interface ClassTalent {
 	talents: Talent[]
 }
 
-interface Glyph {
+export interface Glyph {
 	glyphSlot: number
 	talentGroup: number
 	glyphData: {
@@ -79,7 +79,7 @@ interface Glyph {
 	}
 }
 
-interface CharacterTalent {
+export interface CharacterTalent {
 	guid: number
 	spell: number
 	talentGroup: number
