@@ -1,5 +1,43 @@
 import { useQuery } from '@tanstack/react-query'
-import type { GuildResponse } from '@/app/api/guild/route'
+import { fetchSirusAPI, SIRUS_API } from '@/lib/sirus-api'
+import { z } from 'zod'
+
+// Схема для валидации данных от Sirus API
+const skillSchema = z.object({
+	skill: z.number(),
+	value: z.number(),
+	max: z.number(),
+})
+
+const memberSchema = z.object({
+	guid: z.number(),
+	name: z.string(),
+	race: z.number(),
+	class: z.number(),
+	level: z.number(),
+	gender: z.number(),
+	ilvl: z.number(),
+	skills: z.array(skillSchema),
+	rank: z.number(),
+	faction: z.number(),
+})
+
+const rankSchema = z.object({
+	rid: z.number(),
+	rname: z.string(),
+})
+
+const guildSchema = z.object({
+	guild: z.object({
+		id: z.number(),
+		name: z.string(),
+		level: z.number(),
+	}),
+	ranks: z.array(rankSchema),
+	members: z.array(memberSchema),
+})
+
+export type GuildResponse = z.infer<typeof guildSchema>
 
 interface UseGuildResult {
 	data: GuildResponse | undefined
@@ -22,13 +60,10 @@ export function useGuild (): UseGuildResult {
 	const { data, isLoading, isError } = useQuery<GuildResponse>({
 		queryKey: ['guild'],
 		queryFn: async () => {
-			const res = await fetch('/api/guild')
-
-			if (!res.ok) {
-				throw new Error('Failed to fetch guild')
-			}
-
-			return res.json()
+			// Делаем запрос напрямую к Sirus API с клиента
+			const rawData = await fetchSirusAPI<unknown>(SIRUS_API.guild)
+			// Валидируем данные с помощью Zod
+			return guildSchema.parse(rawData)
 		},
 	})
 

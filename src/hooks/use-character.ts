@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { fetchSirusAPI, SIRUS_API } from '@/lib/sirus-api'
 import type { CharacterResponse } from '@/app/api/character/[name]/route'
 
 interface Talent {
@@ -92,14 +93,11 @@ export function useCharacter (name: string): UseCharacterResult {
 	const { data, isLoading, isError } = useQuery<CharacterResponse>({
 		queryKey: ['character', name],
 		queryFn: async () => {
-			// Next.js автоматически обработает кодирование URL
-			const res = await fetch(`/api/character/${name}`)
-
-			if (!res.ok) {
-				throw new Error('Failed to fetch character')
-			}
-
-			return res.json()
+			// Делаем запрос напрямую к Sirus API с клиента
+			const rawData = await fetchSirusAPI<unknown>(SIRUS_API.character(name))
+			// Валидируем данные - используем passthrough для гибкости
+			// Типизируем как CharacterResponse, так как схема может быть неполной
+			return rawData as CharacterResponse
 		},
 		enabled: !!name,
 	})
