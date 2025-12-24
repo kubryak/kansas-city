@@ -42,9 +42,40 @@ const REALM_ID = 22
 const GUILD_ID = 39104
 const SIRUS_GUILD_URL = `https://sirus.su/api/base/${REALM_ID}/guild/${GUILD_ID}`
 
+async function fetchWithRetry(url: string, options: RequestInit, maxRetries = 3): Promise<Response> {
+	for (let i = 0; i < maxRetries; i++) {
+		try {
+			// Если это повторная попытка, изменяем заголовки
+			const retryOptions = i > 0 ? {
+				...options,
+				headers: {
+					...getSirusHeaders(),
+					'User-Agent': `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${120 + i}.0.0.0 Safari/537.36`,
+				},
+			} : options
+			
+			const res = await fetch(url, retryOptions)
+			
+			// Если получили 403 и это не последняя попытка, пробуем снова
+			if (res.status === 403 && i < maxRetries - 1) {
+				// Добавляем случайную задержку от 1 до 3 секунд
+				await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000))
+				continue
+			}
+			
+			return res
+		} catch (err) {
+			if (i === maxRetries - 1) throw err
+			await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+		}
+	}
+	
+	throw new Error('Max retries exceeded')
+}
+
 export async function GET () {
 	try {
-		const res = await fetch(SIRUS_GUILD_URL, {
+		const res = await fetchWithRetry(SIRUS_GUILD_URL, {
 			// Отключаем кэш, чтобы не сохранять возможные ответы Cloudflare 403
 			cache: 'no-store',
 			// Минимизируем заголовки, чтобы не триггерить защиту Cloudflare
