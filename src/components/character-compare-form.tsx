@@ -64,3 +64,5 @@ export function CharacterCompareForm({ onCompare }: CharacterCompareFormProps) {
 	)
 }
 
+
+

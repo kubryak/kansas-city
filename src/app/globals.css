@@ -77,3 +77,61 @@ body {
   background-size: 200% 200%;
   animation: rotate-glow 4s ease-in-out infinite, shimmer 2.5s ease-in-out infinite;
 }
+
+@keyframes card-flip {
+  0% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotateY(90deg) scale(0.95);
+    opacity: 0.5;
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes card-reveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes prize-fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-card-flip {
+  animation: card-flip 0.6s ease-in-out;
+}
+
+.animate-card-reveal {
+  animation: card-reveal 0.4s ease-out;
+}
+
+.animate-prize-fade {
+  animation: prize-fade 0.3s ease-out;
+}
+
+@keyframes roulette-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-roulette-spin {
+  animation: roulette-spin 2s cubic-bezier(0.4, 0, 0.2, 1);
+}
