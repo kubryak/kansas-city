@@ -54,6 +54,9 @@ interface UseGuildResult {
 	classCounts: Record<number, number>
 	classMembers: Record<number, string[]>
 	sortedMembers: GuildResponse['members']
+	others: GuildResponse['members']
+	othersClassCounts: Record<number, number>
+	othersClassMembers: Record<number, string[]>
 }
 
 export function useGuild (): UseGuildResult {
@@ -83,6 +86,9 @@ export function useGuild (): UseGuildResult {
 			classCounts: {},
 			classMembers: {},
 			sortedMembers: [],
+			others: [],
+			othersClassCounts: {},
+			othersClassMembers: {},
 		}
 	}
 
@@ -96,23 +102,32 @@ export function useGuild (): UseGuildResult {
 
 	const twinkRankId = twinkRank?.rid
 
+	const excludedRankNames = new Set([
+		'твинк',
+		'замена',
+		'крафтер',
+		'статик-10',
+	])
+
+	const excludedRankIds = new Set(
+		ranks
+			.filter((rank) =>
+				excludedRankNames.has(rank.rname.toLowerCase()),
+			)
+			.map((rank) => rank.rid),
+	)
+
 	const twinks = twinkRankId
 		? members.filter((member) => member.rank === twinkRankId)
 		: []
 
-	const EXCLUDED_MAIN_NAMES = new Set(['эгорм', 'негрони', 'пашакалуга'])
+	const EXCLUDED_MAIN_NAMES = new Set(['негрони'])
 
-	const mainsAll =
-		twinkRankId != null
-			? members.filter(
-					(member) =>
-						member.rank !== twinkRankId &&
-						!EXCLUDED_MAIN_NAMES.has(member.name.toLowerCase()),
-			  )
-			: members.filter(
-					(member) =>
-						!EXCLUDED_MAIN_NAMES.has(member.name.toLowerCase()),
-			  )
+	const mainsAll = members.filter(
+		(member) =>
+			!excludedRankIds.has(member.rank) &&
+			!EXCLUDED_MAIN_NAMES.has(member.name.toLowerCase()),
+	)
 
 	const mainsLevel80 = mainsAll.filter((member) => member.level === 80)
 	const mains = mainsLevel80
@@ -144,6 +159,43 @@ export function useGuild (): UseGuildResult {
 		{},
 	)
 
+	// Остальные персонажи: уровень 80, не твинки, не мейны
+	// Это те, кто уровень 80, но либо имеет исключенное звание (кроме крафтера), либо исключен по имени
+	const craftRank = ranks.find(
+		(rank) => rank.rname.toLowerCase() === 'крафтер',
+	)
+	const craftRankId = craftRank?.rid
+
+	const othersLevel80 = members.filter(
+		(member) =>
+			member.level === 80 &&
+			(twinkRankId == null || member.rank !== twinkRankId) &&
+			(craftRankId == null || member.rank !== craftRankId) &&
+			(excludedRankIds.has(member.rank) ||
+				EXCLUDED_MAIN_NAMES.has(member.name.toLowerCase())),
+	)
+
+	const othersClassCounts = othersLevel80.reduce<Record<number, number>>(
+		(acc, member) => {
+			acc[member.class] = (acc[member.class] ?? 0) + 1
+			return acc
+		},
+		{},
+	)
+
+	const othersClassMembers = othersLevel80.reduce<Record<number, string[]>>(
+		(acc, member) => {
+			if (!acc[member.class]) {
+				acc[member.class] = []
+			}
+
+			acc[member.class]!.push(member.name)
+
+			return acc
+		},
+		{},
+	)
+
 	const sortedMembers = [...members].sort((a, b) => b.ilvl - a.ilvl)
 
 	return {
@@ -161,6 +213,9 @@ export function useGuild (): UseGuildResult {
 		classCounts,
 		classMembers,
 		sortedMembers,
+		others: othersLevel80,
+		othersClassCounts,
+		othersClassMembers,
 	}
 }
 

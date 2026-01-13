@@ -3,7 +3,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import { useCharacter } from "@/hooks/use-character";
 import { SafeImage } from "@/components/safe-image";
 import { CharacterHeader } from "@/components/character-header";
@@ -66,12 +65,6 @@ export default function CharacterPage() {
 	if (isError || !character) {
 		return (
       <main className="mx-auto flex min-h-screen max-w-[1500px] flex-col gap-8 px-6 py-8">
-				<Link
-          href="/members"
-          className="text-sm text-zinc-400 hover:text-zinc-200"
-				>
-					← Назад к составу гильдии
-				</Link>
         <div className="flex items-center justify-center">
           <p className="text-lg text-red-500">
 						Не удалось загрузить данные персонажа
@@ -131,13 +124,6 @@ export default function CharacterPage() {
 
 	return (
     <main className="mx-auto flex max-w-[1500px] flex-col gap-8 px-6 py-8">
-			<Link
-        href="/members"
-        className="text-sm text-zinc-400 hover:text-zinc-200"
-			>
-				← Назад к составу гильдии
-			</Link>
-
 			{/* Основная информация о персонаже и экипировка */}
       <div className="flex gap-6">
 				{/* Блок информации о персонаже */}

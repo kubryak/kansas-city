@@ -35,12 +35,16 @@ function getProgressColorClass (killed: number, total: number): string {
 	return 'text-emerald-400'
 }
 
-export function ProgressWidget () {
+interface ProgressWidgetProps {
+	guildId?: number
+}
+
+export function ProgressWidget ({ guildId }: ProgressWidgetProps = {}) {
 	const { data, isLoading, isError } = useQuery<ProgressResponse>({
-		queryKey: ['progression'],
+		queryKey: ['progression', guildId],
 		queryFn: async () => {
 			const { fetchProgression } = await import('@/lib/sirus-api-helpers')
-			return await fetchProgression()
+			return await fetchProgression(guildId)
 		},
 	})
 

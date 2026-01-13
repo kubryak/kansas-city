@@ -9,6 +9,8 @@ interface GuildHeaderProps {
 	avgIlvl: number
 	classCounts: Record<number, number>
 	classMembers: Record<number, string[]>
+	othersClassCounts: Record<number, number>
+	othersClassMembers: Record<number, string[]>
 }
 
 export function GuildHeader ({
@@ -19,9 +21,11 @@ export function GuildHeader ({
 	avgIlvl,
 	classCounts,
 	classMembers,
+	othersClassCounts,
+	othersClassMembers,
 }: GuildHeaderProps) {
 	return (
-		<section className='flex flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/80 p-4 shadow-lg shadow-black/40'>
+		<section className='relative z-10 flex flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/80 p-4 shadow-lg shadow-black/40'>
 			<div className='flex items-stretch gap-4'>
 				<div className='flex flex-col items-center justify-center rounded-xl bg-zinc-900/80 px-4 py-3'>
 					<img
@@ -82,6 +86,16 @@ export function GuildHeader ({
 					classMembers={classMembers}
 				/>
 			</div>
+
+			{Object.keys(othersClassCounts).length > 0 && (
+				<div className='pt-4 border-t border-zinc-800'>
+					<ClassDistribution
+						classCounts={othersClassCounts}
+						classMembers={othersClassMembers}
+						title='Распределение по классам (твинки)'
+					/>
+				</div>
+			)}
 		</section>
 	)
 }

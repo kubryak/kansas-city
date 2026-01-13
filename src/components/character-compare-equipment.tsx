@@ -6,6 +6,75 @@ import { SafeImage } from '@/components/safe-image'
 import { ItemTooltip } from '@/components/item-tooltip'
 import { renderHtmlText } from '@/utils/html-utils'
 
+// Импортируем STAT_TYPE_MAP из item-tooltip (копируем для использования)
+const STAT_TYPE_MAP: Record<number, string> = {
+	0: 'к мане',
+	1: 'к здоровью',
+	3: 'к ловкости',
+	4: 'к силе',
+	5: 'к интеллекту',
+	6: 'к духу',
+	7: 'к выносливости',
+	12: 'к рейтингу защиты',
+	13: 'к рейтингу уклонения',
+	14: 'к рейтингу парирования',
+	15: 'к рейтингу блокирования',
+	16: 'к рейтингу меткости в ближнем бою',
+	17: 'к рейтингу меткости в дальнем бою',
+	18: 'к рейтингу меткости заклинаний',
+	19: 'к рейтингу критического удара в ближнем бою',
+	20: 'к рейтингу критического удара в дальнем бою',
+	21: 'к рейтингу критического удара заклинаний',
+	22: 'к рейтингу получаемой меткости в ближнем бою',
+	23: 'к рейтингу получаемой меткости в дальнем бою',
+	24: 'к рейтингу получаемой меткости заклинаний',
+	25: 'к рейтингу получаемого критического удара в ближнем бою',
+	26: 'к рейтингу получаемого критического удара в дальнем бою',
+	27: 'к рейтингу получаемого критического удара заклинаний',
+	28: 'к рейтингу скорости атаки в ближнем бою',
+	29: 'к рейтингу скорости атаки в дальнем бою',
+	30: 'к рейтингу скорости заклинаний',
+	31: 'к рейтингу меткости',
+	32: 'к рейтингу критического удара',
+	33: 'к рейтингу получаемой меткости',
+	34: 'к рейтингу получаемого критического удара',
+	35: 'к рейтингу устойчивости',
+	36: 'к рейтингу скорости',
+	37: 'к рейтингу экспертизы',
+	38: 'к силе атаки',
+	39: 'к силе атаки в дальнем бою',
+	40: 'к рейтингу универсальности',
+	41: 'к исцелению заклинаниями',
+	42: 'к урону заклинаниями',
+	43: 'к регенерации маны',
+	44: 'к рейтингу пробивания брони',
+	45: 'к силе заклинаний',
+	46: 'к регенерации здоровья',
+	47: 'к пробиванию заклинаний',
+	48: 'к значению блокирования',
+	49: 'к рейтингу мастерства',
+	50: 'к дополнительной броне',
+	51: 'к сопротивлению огню',
+	52: 'к сопротивлению магии льда',
+	53: 'к сопротивлению светлой магии',
+	54: 'к сопротивлению темной магии',
+	55: 'к сопротивлению силам природы',
+	56: 'к сопротивлению тайной магии',
+	57: 'к силе PvP',
+	58: 'к усилению критического удара',
+	59: 'к множественному удару',
+	60: 'к готовности',
+	61: 'к скорости',
+	62: 'к вампиризму',
+	63: 'к избеганию',
+	64: 'к прочности',
+	66: 'к рассекающему удару',
+	71: 'к ловкости, силе и интеллекту',
+	72: 'к ловкости и силе',
+	73: 'к ловкости и интеллекту',
+	74: 'к силе и интеллекту',
+}
+
 type EquipmentItem = {
 	key?: string
 	entry?: number
@@ -55,8 +124,6 @@ const EQUIPMENT_SLOT_ORDER = [
 	{ key: 'shoulders', label: 'Плечи' },
 	{ key: 'back', label: 'Плащ' },
 	{ key: 'chest', label: 'Грудь' },
-	{ key: 'body', label: 'Рубашка' },
-	{ key: 'tabard', label: 'Гербовая накидка' },
 	{ key: 'wrists', label: 'Наручи' },
 	{ key: 'hands', label: 'Руки' },
 	{ key: 'waist', label: 'Пояс' },
@@ -77,6 +144,123 @@ function getItemByKey(
 ): EquipmentItem | null {
 	if (!equipments) return null
 	return equipments.find((item) => item.key === key) ?? null
+}
+
+// Извлекает все характеристики из предмета
+function extractItemStats(item: ItemStats | null | undefined): Map<number, number> {
+	const stats = new Map<number, number>()
+	if (!item) return stats
+
+	for (let i = 1; i <= 10; i++) {
+		const statType = item[`stat_type${i}` as keyof ItemStats] as number | undefined
+		const statValue = item[`stat_value${i}` as keyof ItemStats] as number | undefined
+		
+		if (statType && statValue && statType !== 0 && statValue !== 0) {
+			// Если уже есть такой тип, суммируем значения
+			const current = stats.get(statType) || 0
+			stats.set(statType, current + statValue)
+		}
+	}
+
+	return stats
+}
+
+// Объединяет характеристики двух предметов
+function combineItemStats(
+	item1: ItemTooltipData | null | undefined,
+	item2: ItemTooltipData | null | undefined,
+): Map<number, number> {
+	const stats1 = extractItemStats(item1?.item)
+	const stats2 = extractItemStats(item2?.item)
+	
+	// Объединяем характеристики из обоих предметов
+	const combined = new Map<number, number>()
+	
+	// Добавляем характеристики из первого предмета
+	for (const [statType, value] of stats1) {
+		combined.set(statType, (combined.get(statType) || 0) + value)
+	}
+	
+	// Добавляем характеристики из второго предмета
+	for (const [statType, value] of stats2) {
+		combined.set(statType, (combined.get(statType) || 0) + value)
+	}
+	
+	return combined
+}
+
+// Сравнивает два предмета и возвращает разницу
+function compareItemStats(
+	item1: ItemTooltipData | null | undefined,
+	item2: ItemTooltipData | null | undefined,
+): Array<{ statType: number; statName: string; value1: number; value2: number; diff: number }> {
+	const stats1 = extractItemStats(item1?.item)
+	const stats2 = extractItemStats(item2?.item)
+
+	const allStatTypes = new Set([...stats1.keys(), ...stats2.keys()])
+	const differences: Array<{ statType: number; statName: string; value1: number; value2: number; diff: number }> = []
+
+	for (const statType of allStatTypes) {
+		const value1 = stats1.get(statType) || 0
+		const value2 = stats2.get(statType) || 0
+		const diff = value1 - value2
+
+		// Показываем только если есть разница
+		if (diff !== 0) {
+			const statName = STAT_TYPE_MAP[statType] || `стат ${statType}`
+			differences.push({ statType, statName, value1, value2, diff })
+		}
+	}
+
+	// Сортируем: сначала основные характеристики, потом по разнице (большая разница сначала)
+	return differences.sort((a, b) => {
+		const primaryStats = [3, 4, 5, 6, 7] // Ловкость, Сила, Интеллект, Дух, Выносливость
+		const aIsPrimary = primaryStats.includes(a.statType)
+		const bIsPrimary = primaryStats.includes(b.statType)
+		
+		if (aIsPrimary && !bIsPrimary) return -1
+		if (!aIsPrimary && bIsPrimary) return 1
+		
+		return Math.abs(b.diff) - Math.abs(a.diff)
+	})
+}
+
+// Сравнивает объединенные характеристики двух пар предметов (например, mainhand + offhand)
+function compareCombinedItemStats(
+	item1a: ItemTooltipData | null | undefined,
+	item1b: ItemTooltipData | null | undefined,
+	item2a: ItemTooltipData | null | undefined,
+	item2b: ItemTooltipData | null | undefined,
+): Array<{ statType: number; statName: string; value1: number; value2: number; diff: number }> {
+	const combinedStats1 = combineItemStats(item1a, item1b)
+	const combinedStats2 = combineItemStats(item2a, item2b)
+
+	const allStatTypes = new Set([...combinedStats1.keys(), ...combinedStats2.keys()])
+	const differences: Array<{ statType: number; statName: string; value1: number; value2: number; diff: number }> = []
+
+	for (const statType of allStatTypes) {
+		const value1 = combinedStats1.get(statType) || 0
+		const value2 = combinedStats2.get(statType) || 0
+		const diff = value1 - value2
+
+		// Показываем только если есть разница
+		if (diff !== 0) {
+			const statName = STAT_TYPE_MAP[statType] || `стат ${statType}`
+			differences.push({ statType, statName, value1, value2, diff })
+		}
+	}
+
+	// Сортируем: сначала основные характеристики, потом по разнице (большая разница сначала)
+	return differences.sort((a, b) => {
+		const primaryStats = [3, 4, 5, 6, 7] // Ловкость, Сила, Интеллект, Дух, Выносливость
+		const aIsPrimary = primaryStats.includes(a.statType)
+		const bIsPrimary = primaryStats.includes(b.statType)
+		
+		if (aIsPrimary && !bIsPrimary) return -1
+		if (!aIsPrimary && bIsPrimary) return 1
+		
+		return Math.abs(b.diff) - Math.abs(a.diff)
+	})
 }
 
 function getQualityBorderColor(quality?: number): string {
@@ -427,145 +611,227 @@ export function CharacterCompareEquipment({
 										return null
 									}
 
+									const itemData = itemsData.get(slot.key)
+									
+									// Для mainhand суммируем характеристики обеих рук перед сравнением
+									// Для offhand не показываем разницу, так как она уже учтена в mainhand
+									let statsDiff: Array<{ statType: number; statName: string; value1: number; value2: number; diff: number }>
+									
+									if (slot.key === 'mainhand') {
+										const mainhandData1 = itemsData.get('mainhand')?.item1
+										const offhandData1 = itemsData.get('offhand')?.item1
+										const mainhandData2 = itemsData.get('mainhand')?.item2
+										const offhandData2 = itemsData.get('offhand')?.item2
+										
+										// Сравниваем объединенные характеристики обеих рук
+										statsDiff = compareCombinedItemStats(
+											mainhandData1,
+											offhandData1,
+											mainhandData2,
+											offhandData2,
+										)
+									} else if (slot.key === 'offhand') {
+										// Для offhand не показываем разницу, так как она уже учтена в mainhand
+										statsDiff = []
+									} else {
+										// Для остальных слотов сравниваем как обычно
+										statsDiff = compareItemStats(itemData?.item1, itemData?.item2)
+									}
+									
+									// Проверяем, одинаковые ли предметы
+									const isSameItem = item1?.entry && item2?.entry && item1.entry === item2.entry
+
 									return (
 										<div
 											key={slot.key}
-											className="py-3 border-b border-zinc-800 last:border-0"
+											className={`py-3 border-b border-zinc-800 last:border-0 ${
+												isSameItem ? 'bg-green-900/20' : ''
+											}`}
 										>
 											<div className="grid grid-cols-3 gap-4 items-start">
 												<div className="text-sm text-zinc-400 font-medium">
 													{slot.label}
 												</div>
-												<div className="flex items-start gap-3">
-													{item1 ? (
-														<>
-															{item1.entry ? (
-																<div className="relative">
-																	<ItemTooltip
-																		itemId={item1.entry}
-																		characterGuid={character1Guid}
-																	>
-																		<div
-																			ref={getIconRef(slot.key, 'left')}
-																			onClick={(e) => {
-																				e.stopPropagation()
-																				handleItemClick('left', slot.key, item1.entry, character1Guid, getIconRef(slot.key, 'left'))
-																			}}
-																			className={`relative w-12 h-12 rounded border-2 ${getQualityBorderColor(
-																				item1.quality,
-																			)} ${pinnedTooltips.left?.slotKey === slot.key && pinnedTooltips.left?.itemId === item1.entry ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-900' : ''} bg-zinc-800 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-zinc-700 transition-colors`}
+												<div className="flex flex-col gap-2">
+													<div className="flex items-start gap-3">
+														{item1 ? (
+															<>
+																{item1.entry ? (
+																	<div className="relative">
+																		<ItemTooltip
+																			itemId={item1.entry}
+																			characterGuid={character1Guid}
 																		>
-																			{item1.icon && (
-																				<SafeImage
-																					src={item1.icon}
-																					alt={item1.name ?? slot.label}
-																					className="w-10 h-10"
-																				/>
-																			)}
-																			{pinnedTooltips.left?.slotKey === slot.key && pinnedTooltips.left?.itemId === item1.entry && (
-																				<div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-																					<svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-																						<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-																					</svg>
-																				</div>
-																			)}
-																		</div>
-																	</ItemTooltip>
-																</div>
-															) : (
-																<div
-																	className={`relative w-12 h-12 rounded border-2 ${getQualityBorderColor(
-																		item1.quality,
-																	)} bg-zinc-800 flex items-center justify-center flex-shrink-0`}
-																>
-																	{item1.icon && (
-																		<SafeImage
-																			src={item1.icon}
-																			alt={item1.name ?? slot.label}
-																			className="w-10 h-10"
-																		/>
-																	)}
-																</div>
-															)}
-															<div className="flex-1 min-w-0">
-																<div className="text-sm text-zinc-200">
-																	{renderHtmlText(item1.name) || 'Неизвестный предмет'}
-																</div>
-																{item1.itemLevel && (
-																	<div className="text-xs text-zinc-500">
-																		ilvl {item1.itemLevel}
+																			<div
+																				ref={getIconRef(slot.key, 'left')}
+																				onClick={(e) => {
+																					e.stopPropagation()
+																					handleItemClick('left', slot.key, item1.entry, character1Guid, getIconRef(slot.key, 'left'))
+																				}}
+																				className={`relative w-12 h-12 rounded border-2 ${getQualityBorderColor(
+																					item1.quality,
+																				)} ${pinnedTooltips.left?.slotKey === slot.key && pinnedTooltips.left?.itemId === item1.entry ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-900' : ''} bg-zinc-800 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-zinc-700 transition-colors`}
+																			>
+																				{item1.icon && (
+																					<SafeImage
+																						src={item1.icon}
+																						alt={item1.name ?? slot.label}
+																						className="w-10 h-10"
+																					/>
+																				)}
+																				{pinnedTooltips.left?.slotKey === slot.key && pinnedTooltips.left?.itemId === item1.entry && (
+																					<div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+																						<svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+																							<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+																						</svg>
+																					</div>
+																				)}
+																			</div>
+																		</ItemTooltip>
+																	</div>
+																) : (
+																	<div
+																		className={`relative w-12 h-12 rounded border-2 ${getQualityBorderColor(
+																			item1.quality,
+																		)} bg-zinc-800 flex items-center justify-center flex-shrink-0`}
+																	>
+																		{item1.icon && (
+																			<SafeImage
+																				src={item1.icon}
+																				alt={item1.name ?? slot.label}
+																				className="w-10 h-10"
+																			/>
+																		)}
 																	</div>
 																)}
-															</div>
-														</>
-													) : (
-														<div className="text-sm text-zinc-600">Нет предмета</div>
+																<div className="flex-1 min-w-0">
+																	<div className="text-sm text-zinc-200">
+																		{renderHtmlText(item1.name) || 'Неизвестный предмет'}
+																	</div>
+																	{item1.itemLevel && (
+																		<div className="text-xs text-zinc-500">
+																			ilvl {item1.itemLevel}
+																		</div>
+																	)}
+																</div>
+															</>
+														) : (
+															<div className="text-sm text-zinc-600">Нет предмета</div>
+														)}
+													</div>
+													{/* Показываем разницу характеристик */}
+													{itemData && statsDiff.length > 0 && (
+														<div className="ml-[60px] space-y-1 text-xs">
+															{statsDiff.map((stat) => {
+																const isPositive = stat.diff > 0
+																const isNegative = stat.diff < 0
+																const diffText = isPositive ? `+${stat.diff}` : `${stat.diff}`
+																
+																return (
+																	<div key={stat.statType} className="flex items-center gap-2">
+																		<span className="text-zinc-500">
+																			{stat.statName}:
+																		</span>
+																		<span className={`font-medium ${
+																			isPositive ? 'text-green-400' : isNegative ? 'text-red-400' : 'text-zinc-400'
+																		}`}>
+																			{stat.value1} {stat.diff !== 0 && `(${diffText})`}
+																		</span>
+																	</div>
+																)
+															})}
+														</div>
 													)}
 												</div>
-												<div className="flex items-start gap-3">
-													{item2 ? (
-														<>
-															{item2.entry ? (
-																<div className="relative">
-																	<ItemTooltip
-																		itemId={item2.entry}
-																		characterGuid={character2Guid}
-																	>
-																		<div
-																			ref={getIconRef(slot.key, 'right')}
-																			onClick={(e) => {
-																				e.stopPropagation()
-																				handleItemClick('right', slot.key, item2.entry, character2Guid, getIconRef(slot.key, 'right'))
-																			}}
-																			className={`relative w-12 h-12 rounded border-2 ${getQualityBorderColor(
-																				item2.quality,
-																			)} ${pinnedTooltips.right?.slotKey === slot.key && pinnedTooltips.right?.itemId === item2.entry ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-900' : ''} bg-zinc-800 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-zinc-700 transition-colors`}
+												<div className="flex flex-col gap-2">
+													<div className="flex items-start gap-3">
+														{item2 ? (
+															<>
+																{item2.entry ? (
+																	<div className="relative">
+																		<ItemTooltip
+																			itemId={item2.entry}
+																			characterGuid={character2Guid}
 																		>
-																			{item2.icon && (
-																				<SafeImage
-																					src={item2.icon}
-																					alt={item2.name ?? slot.label}
-																					className="w-10 h-10"
-																				/>
-																			)}
-																			{pinnedTooltips.right?.slotKey === slot.key && pinnedTooltips.right?.itemId === item2.entry && (
-																				<div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-																					<svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-																						<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-																					</svg>
-																				</div>
-																			)}
-																		</div>
-																	</ItemTooltip>
-																</div>
-															) : (
-																<div
-																	className={`relative w-12 h-12 rounded border-2 ${getQualityBorderColor(
-																		item2.quality,
-																	)} bg-zinc-800 flex items-center justify-center flex-shrink-0`}
-																>
-																	{item2.icon && (
-																		<SafeImage
-																			src={item2.icon}
-																			alt={item2.name ?? slot.label}
-																			className="w-10 h-10"
-																		/>
-																	)}
-																</div>
-															)}
-															<div className="flex-1 min-w-0">
-																<div className="text-sm text-zinc-200">
-																	{renderHtmlText(item2.name) || 'Неизвестный предмет'}
-																</div>
-																{item2.itemLevel && (
-																	<div className="text-xs text-zinc-500">
-																		ilvl {item2.itemLevel}
+																			<div
+																				ref={getIconRef(slot.key, 'right')}
+																				onClick={(e) => {
+																					e.stopPropagation()
+																					handleItemClick('right', slot.key, item2.entry, character2Guid, getIconRef(slot.key, 'right'))
+																				}}
+																				className={`relative w-12 h-12 rounded border-2 ${getQualityBorderColor(
+																					item2.quality,
+																				)} ${pinnedTooltips.right?.slotKey === slot.key && pinnedTooltips.right?.itemId === item2.entry ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-900' : ''} bg-zinc-800 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-zinc-700 transition-colors`}
+																			>
+																				{item2.icon && (
+																					<SafeImage
+																						src={item2.icon}
+																						alt={item2.name ?? slot.label}
+																						className="w-10 h-10"
+																					/>
+																				)}
+																				{pinnedTooltips.right?.slotKey === slot.key && pinnedTooltips.right?.itemId === item2.entry && (
+																					<div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+																						<svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+																							<path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+																						</svg>
+																					</div>
+																				)}
+																			</div>
+																		</ItemTooltip>
+																	</div>
+																) : (
+																	<div
+																		className={`relative w-12 h-12 rounded border-2 ${getQualityBorderColor(
+																			item2.quality,
+																		)} bg-zinc-800 flex items-center justify-center flex-shrink-0`}
+																	>
+																		{item2.icon && (
+																			<SafeImage
+																				src={item2.icon}
+																				alt={item2.name ?? slot.label}
+																				className="w-10 h-10"
+																			/>
+																		)}
 																	</div>
 																)}
-															</div>
-														</>
-													) : (
-														<div className="text-sm text-zinc-600">Нет предмета</div>
+																<div className="flex-1 min-w-0">
+																	<div className="text-sm text-zinc-200">
+																		{renderHtmlText(item2.name) || 'Неизвестный предмет'}
+																	</div>
+																	{item2.itemLevel && (
+																		<div className="text-xs text-zinc-500">
+																			ilvl {item2.itemLevel}
+																		</div>
+																	)}
+																</div>
+															</>
+														) : (
+															<div className="text-sm text-zinc-600">Нет предмета</div>
+														)}
+													</div>
+													{/* Показываем разницу характеристик */}
+													{itemData && statsDiff.length > 0 && (
+														<div className="ml-[60px] space-y-1 text-xs">
+															{statsDiff.map((stat) => {
+																const isPositive = stat.diff < 0 // Для второго персонажа инвертируем
+																const isNegative = stat.diff > 0
+																const diffText = isPositive ? `+${Math.abs(stat.diff)}` : `-${Math.abs(stat.diff)}`
+																
+																return (
+																	<div key={stat.statType} className="flex items-center gap-2">
+																		<span className="text-zinc-500">
+																			{stat.statName}:
+																		</span>
+																		<span className={`font-medium ${
+																			isPositive ? 'text-green-400' : isNegative ? 'text-red-400' : 'text-zinc-400'
+																		}`}>
+																			{stat.value2} {stat.diff !== 0 && `(${diffText})`}
+																		</span>
+																	</div>
+																)
+															})}
+														</div>
 													)}
 												</div>
 											</div>

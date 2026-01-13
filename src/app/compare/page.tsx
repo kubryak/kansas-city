@@ -8,7 +8,6 @@ import { CharacterCompareEquipment } from '@/components/character-compare-equipm
 import { CharacterCompareTalents, type ClassTalent } from '@/components/character-compare-talents'
 import { CharacterCompareSocketsEnhanced } from '@/components/character-compare-sockets-enhanced'
 import { CharacterCompareHeader } from '@/components/character-compare-header'
-import Link from 'next/link'
 
 export default function ComparePage() {
 	const [character1Name, setCharacter1Name] = React.useState<string>('')
@@ -50,13 +49,6 @@ export default function ComparePage() {
 
 	return (
 		<main className="mx-auto flex max-w-[1500px] flex-col gap-8 px-6 py-8">
-			<Link
-				href="/members"
-				className="text-sm text-zinc-400 hover:text-zinc-200"
-			>
-				← Назад к составу гильдии
-			</Link>
-
 			<div className="rounded-xl border border-zinc-800 bg-zinc-900/80 p-6">
 				<h1 className="mb-6 text-2xl font-semibold text-zinc-100">
 					Сравнение персонажей

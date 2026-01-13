@@ -1,6 +1,7 @@
 interface ClassDistributionProps {
 	classCounts: Record<number, number>
 	classMembers: Record<number, string[]>
+	title?: string
 }
 
 function getClassColor (classId: number) {
@@ -59,12 +60,13 @@ const CLASS_BAR_COLOR_MAP: Record<number, string> = {
 export function ClassDistribution ({
 	classCounts,
 	classMembers,
+	title = 'Распределение по классам (мейны)',
 }: ClassDistributionProps) {
 	return (
 		<div className='w-full text-xs text-zinc-300'>
 			<div className='mb-2 flex items-center justify-between'>
 				<span className='text-sm font-semibold text-zinc-100'>
-					Распределение по классам (мейны)
+					{title}
 				</span>
 			</div>
 			<div className='flex flex-wrap gap-2'>
@@ -103,7 +105,7 @@ export function ClassDistribution ({
 								</span>
 
 								{members.length > 0 && (
-									<div className='pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden max-h-64 w-64 -translate-x-1/2 overflow-y-auto rounded-md bg-black/90 px-3 py-2 text-xs text-zinc-100 shadow-xl backdrop-blur-sm group-hover:block'>
+									<div className='pointer-events-none absolute left-1/2 top-full z-10 mt-2 hidden max-h-64 w-64 -translate-x-1/2 overflow-y-auto rounded-md bg-black/90 px-3 py-2 text-xs text-zinc-100 shadow-xl backdrop-blur-sm group-hover:block'>
 										<p className='mb-1 text-[11px] font-semibold text-zinc-300'>
 											Игроки этого класса:
 										</p>

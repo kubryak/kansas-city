@@ -73,7 +73,11 @@ function formatDateTime (timeEnd: string): { date: string; time: string } {
 	}
 }
 
-export function LatestKillsWidget () {
+interface LatestKillsWidgetProps {
+	guildId?: number
+}
+
+export function LatestKillsWidget ({ guildId }: LatestKillsWidgetProps = {}) {
 	const [period, setPeriod] = useState<PeriodKey>('current')
 	const [viewMode, setViewMode] = useState<ViewMode>('list')
 	const [page, setPage] = useState<number>(1)
@@ -81,7 +85,7 @@ export function LatestKillsWidget () {
 	const [selectedBossId, setSelectedBossId] = useState<number | null>(null)
 
 	const { data, isLoading, isError } = useQuery<LatestKillsResponse>({
-		queryKey: ['latest-kills', period, page, selectedRaidIndex, selectedBossId],
+		queryKey: ['latest-kills', guildId, period, page, selectedRaidIndex, selectedBossId],
 		queryFn: async () => {
 			const params = new URLSearchParams()
 			params.set('period', period)
@@ -98,6 +102,7 @@ export function LatestKillsWidget () {
 				page,
 				raidIndex: selectedRaidIndex,
 				bossId: selectedBossId,
+				guildId: guildId,
 			})
 		},
 	})

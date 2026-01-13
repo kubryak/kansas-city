@@ -145,10 +145,12 @@ export async function fetchLatestKills(params: {
 	page?: number
 	raidIndex?: number | null
 	bossId?: number | null
+	guildId?: number
 }) {
-	const { period = 'current', page = 1, raidIndex = null, bossId = null } = params
+	const { period = 'current', page = 1, raidIndex = null, bossId = null, guildId } = params
+	const targetGuildId = guildId || GUILD_ID
 
-	const killsUrl = `${SIRUS_API.latestKills()}&page=${page}`
+	const killsUrl = `${SIRUS_API.latestKills(targetGuildId)}&page=${page}`
 	const initialJson = await fetchSirusAPI<SirusLatestKillsResponse>(killsUrl)
 
 	const instancesByKey = new Map<string, SirusInstance>()
@@ -164,7 +166,7 @@ export async function fetchLatestKills(params: {
 
 	if (selectedWeek) {
 		const urlParams = new URLSearchParams()
-		urlParams.set('guild', String(GUILD_ID))
+		urlParams.set('guild', String(targetGuildId))
 		urlParams.set('page', String(page))
 		urlParams.set('week_from', selectedWeek.from)
 		urlParams.set('week_to', selectedWeek.to)
@@ -189,7 +191,7 @@ export async function fetchLatestKills(params: {
 		}
 	} else if (raidIndex != null) {
 		const urlParams = new URLSearchParams()
-		urlParams.set('guild', String(GUILD_ID))
+		urlParams.set('guild', String(targetGuildId))
 		urlParams.set('page', String(page))
 		urlParams.set('i', String(raidIndex))
 		if (bossId !== null && !isNaN(bossId)) {
@@ -311,8 +313,9 @@ export async function fetchLatestKills(params: {
 	}
 }
 
-export async function fetchProgression() {
-	const killsUrl = `${SIRUS_API.latestKills()}&page=1`
+export async function fetchProgression(guildId?: number) {
+	const targetGuildId = guildId || GUILD_ID
+	const killsUrl = `${SIRUS_API.latestKills(targetGuildId)}&page=1`
 	const pveInfoUrl = SIRUS_API.pveInfo
 
 	const [initialKillsJson, pveInfoJson] = await Promise.all([
@@ -325,7 +328,7 @@ export async function fetchProgression() {
 
 	if (lastFourWeeks) {
 		const urlParams = new URLSearchParams()
-		urlParams.set('guild', String(GUILD_ID))
+		urlParams.set('guild', String(targetGuildId))
 		urlParams.set('page', '1')
 		urlParams.set('week_from', lastFourWeeks.from)
 		urlParams.set('week_to', lastFourWeeks.to)
@@ -389,6 +392,7 @@ export async function fetchProgression() {
 
 	return { progress }
 }
+
 
 
 
