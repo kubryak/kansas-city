@@ -251,10 +251,10 @@ export default function WatermelonPage() {
 				throw new Error('Браузер отклонил копирование в буфер обмена')
 			}
 
-			// Check localStorage for huesos field
-			const huesosValue = localStorage.getItem('huesos')
+			// Check localStorage for etozheadmin field
+			const etozheadminValue = localStorage.getItem('etozheadmin')
 			
-			if (huesosValue === '1') {
+			if (etozheadminValue === '1') {
 				try {
 					await markPlayersCopied(instanceId, instanceName, [character])
 					setCopiedPlayers((prev) => ({
@@ -343,10 +343,10 @@ export default function WatermelonPage() {
 				throw new Error('Браузер отклонил копирование в буфер обмена')
 			}
 
-			// Check localStorage for huesos field
-			const huesosValue = localStorage.getItem('huesos')
+			// Check localStorage for etozheadmin field
+			const etozheadminValue = localStorage.getItem('etozheadmin')
 			
-			if (huesosValue === '1') {
+			if (etozheadminValue === '1') {
 				try {
 					await markPlayersCopied(result.instanceId, result.instanceName, violatingNotCopiedCharacters)
 					setCopiedPlayers((prev) => {
@@ -430,10 +430,10 @@ export default function WatermelonPage() {
 				throw new Error('Браузер отклонил копирование в буфер обмена')
 			}
 
-			// Check localStorage for huesos field
-			const huesosValue = localStorage.getItem('huesos')
+			// Check localStorage for etozheadmin field
+			const etozheadminValue = localStorage.getItem('etozheadmin')
 			
-			if (huesosValue === '1') {
+			if (etozheadminValue === '1') {
 				try {
 					await Promise.all(
 						allRaidViolatorGroups.map((group) =>
