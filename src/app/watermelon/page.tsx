@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { collection, doc, getDocs, setDoc, type QueryDocumentSnapshot } from 'firebase/firestore'
 import { db, hasRequiredFirebaseConfig } from '@/lib/firebase'
+import toast from 'react-hot-toast'
 
 interface WatermelonCharacter {
 	name: string
@@ -103,6 +104,7 @@ export default function WatermelonPage() {
 		return copied
 	}
 
+	
 	const formatFightTime = (unixSeconds: number | null): string => {
 		if (!unixSeconds || Number.isNaN(unixSeconds)) {
 			return 'неизвестно'
@@ -249,24 +251,26 @@ export default function WatermelonPage() {
 				throw new Error('Браузер отклонил копирование в буфер обмена')
 			}
 
-			try {
-				await markPlayersCopied(instanceId, instanceName, [character])
-				setCopiedPlayers((prev) => ({
-					...prev,
-					[key]: true,
-				}))
-				setFirebaseError(null)
-			} catch {
-				setFirebaseError('Не удалось записать отметку о копировании в Firebase.')
+			// Check localStorage for huesos field
+			const huesosValue = localStorage.getItem('huesos')
+			
+			if (huesosValue === '1') {
+				try {
+					await markPlayersCopied(instanceId, instanceName, [character])
+					setCopiedPlayers((prev) => ({
+						...prev,
+						[key]: true,
+					}))
+					setFirebaseError(null)
+				} catch {
+					setFirebaseError('Не удалось записать отметку о копировании в Firebase.')
+				}
 			}
 
+			toast.success(`Скопировано: ${character.name}`)
 			setCopiedPlayerKey(key)
-			setCopyStatus(`Скопировано: ${character.name}`)
 			window.setTimeout(() => {
 				setCopiedPlayerKey((current) => (current === key ? null : current))
-				setCopyStatus((current) =>
-					current === `Скопировано: ${character.name}` ? null : current,
-				)
 			}, 1800)
 		} catch (err) {
 			setCopyError(
@@ -339,21 +343,26 @@ export default function WatermelonPage() {
 				throw new Error('Браузер отклонил копирование в буфер обмена')
 			}
 
-			try {
-				await markPlayersCopied(result.instanceId, result.instanceName, violatingNotCopiedCharacters)
-				setCopiedPlayers((prev) => {
-					const next = { ...prev }
-					for (const character of violatingNotCopiedCharacters) {
-						next[buildCopiedKey(result.instanceId, character.name)] = true
-					}
-					return next
-				})
-				setFirebaseError(null)
-			} catch {
-				setFirebaseError('Не удалось записать отметки о копировании в Firebase.')
+			// Check localStorage for huesos field
+			const huesosValue = localStorage.getItem('huesos')
+			
+			if (huesosValue === '1') {
+				try {
+					await markPlayersCopied(result.instanceId, result.instanceName, violatingNotCopiedCharacters)
+					setCopiedPlayers((prev) => {
+						const next = { ...prev }
+						for (const character of violatingNotCopiedCharacters) {
+							next[buildCopiedKey(result.instanceId, character.name)] = true
+						}
+						return next
+					})
+					setFirebaseError(null)
+				} catch {
+					setFirebaseError('Не удалось записать отметки о копировании в Firebase.')
+				}
 			}
 
-			setCopyStatus(`Скопировано нарушителей: ${violatingNotCopiedCharacters.length}`)
+			toast.success(`Скопировано нарушителей: ${violatingNotCopiedCharacters.length}`)
 		} catch (err) {
 			setCopyError(
 				err instanceof Error
@@ -421,27 +430,32 @@ export default function WatermelonPage() {
 				throw new Error('Браузер отклонил копирование в буфер обмена')
 			}
 
-			try {
-				await Promise.all(
-					allRaidViolatorGroups.map((group) =>
-						markPlayersCopied(group.instanceId, group.instanceName, group.violators),
-					),
-				)
-				setCopiedPlayers((prev) => {
-					const next = { ...prev }
-					for (const group of allRaidViolatorGroups) {
-						for (const character of group.violators) {
-							next[buildCopiedKey(group.instanceId, character.name)] = true
+			// Check localStorage for huesos field
+			const huesosValue = localStorage.getItem('huesos')
+			
+			if (huesosValue === '1') {
+				try {
+					await Promise.all(
+						allRaidViolatorGroups.map((group) =>
+							markPlayersCopied(group.instanceId, group.instanceName, group.violators),
+						),
+					)
+					setCopiedPlayers((prev) => {
+						const next = { ...prev }
+						for (const group of allRaidViolatorGroups) {
+							for (const character of group.violators) {
+								next[buildCopiedKey(group.instanceId, character.name)] = true
+							}
 						}
-					}
-					return next
-				})
-				setFirebaseError(null)
-			} catch {
-				setFirebaseError('Не удалось записать отметки о копировании в Firebase.')
+						return next
+					})
+					setFirebaseError(null)
+				} catch {
+					setFirebaseError('Не удалось записать отметки о копировании в Firebase.')
+				}
 			}
 
-			setCopyStatus(`Скопировано нарушителей по всем рейдам: ${allRaidViolatorCount}`)
+			toast.success(`Скопировано нарушителей по всем рейдам: ${allRaidViolatorCount}`)
 		} catch (err) {
 			setCopyError(
 				err instanceof Error
@@ -458,11 +472,13 @@ export default function WatermelonPage() {
 			return [] as WatermelonCharacter[]
 		}
 
+		let characters = result.characters.filter((character) => character.killsAfterFinal > 0)
+
 		if (!hideCopied) {
-			return result.characters
+			return characters
 		}
 
-		return result.characters.filter((character) => {
+		return characters.filter((character) => {
 			const key = buildCopiedKey(result.instanceId, character.name)
 			return !copiedPlayers[key]
 		})
@@ -589,7 +605,7 @@ export default function WatermelonPage() {
 								<p className='mb-3 text-sm font-semibold text-zinc-200'>
 									{group.instanceName} - {group.violators.length}
 								</p>
-								<div className='grid grid-cols-1 gap-2 md:grid-cols-2'>
+								<div className='grid grid-cols-1 gap-2 md:grid-cols-3'>
 									{group.violators.map((character) => (
 										<div key={`${group.instanceId}-${character.name}`} className='rounded-md border border-amber-500 bg-amber-500/10 p-3'>
 											<p className='text-sm text-zinc-100'>{character.name}</p>
@@ -688,7 +704,7 @@ export default function WatermelonPage() {
 								Подходящих персонажей не найдено.
 							</p>
 						) : (
-							<div className='grid grid-cols-1 gap-2 md:grid-cols-2'>
+							<div className='grid grid-cols-1 gap-2 md:grid-cols-3'>
 								{filteredCharacters.map((character) => {
 									const hasKillsAfterFinal = character.killsAfterFinal > 0
 									const isCopied = result
@@ -745,9 +761,16 @@ export default function WatermelonPage() {
 												Есть убийства после финального босса
 											</p>
 										)}
-										<p className='mt-1 text-xs text-zinc-500'>
-											Боссы: {character.bossNames.join(', ') || '-'}
-										</p>
+										{character.repeatedKillsAfterFinal.length > 0 && (
+											<div className='mt-1 text-xs text-zinc-500'>
+												<p className='font-semibold text-amber-300'>Повторные убийства:</p>
+												{character.repeatedKillsAfterFinal.map((kill, index) => (
+													<p key={index} className='text-zinc-400'>
+														{kill.bossName}: {formatFightTime(kill.datetime)}
+													</p>
+												))}
+											</div>
+										)}
 									</div>
 									)
 								})}
