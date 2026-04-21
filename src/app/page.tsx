@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { GitCompare, Search } from 'lucide-react'
+import { GitCompare, Search, ShieldAlert } from 'lucide-react'
 
 export default function Home () {
 	return (
@@ -11,10 +11,10 @@ export default function Home () {
 					Добро пожаловать в Atlas
 				</h1>
 				<p className='text-lg text-zinc-400'>
-					Проект, который помощет сравнить персонажей, просмотреть детальную информацию о конкретном персонаже или гильдии
+					Проект, который поможет сравнить персонажей, просмотреть детальную информацию о конкретном персонаже или гильдии
 				</p>
 				
-				<div className='mt-8 grid grid-cols-1 gap-4 md:grid-cols-2'>
+				<div className='mt-8 grid grid-cols-1 gap-4 md:grid-cols-3'>
 					<Link
 						href='/compare'
 						className='rounded-xl border border-zinc-800 bg-zinc-950/60 p-6 transition-colors hover:border-zinc-700 hover:bg-zinc-900/80'
@@ -27,6 +27,21 @@ export default function Home () {
 						</h2>
 						<p className='text-sm text-zinc-400'>
 							Сравните характеристики, экипировку, сокеты, комплекты, таланты и символы двух персонажей
+						</p>
+					</Link>
+
+					<Link
+						href='/watermelon'
+						className='rounded-xl border border-zinc-800 bg-zinc-950/60 p-6 transition-colors hover:border-zinc-700 hover:bg-zinc-900/80'
+					>
+						<div className='mb-3 flex justify-center'>
+							<ShieldAlert className='h-12 w-12 text-amber-400' />
+						</div>
+						<h2 className='mb-2 text-xl font-semibold text-zinc-100'>
+							Поиск арбузов
+						</h2>
+						<p className='text-sm text-zinc-400'>
+							Откройте список рейдов и найдите персонажей которые превысли порог по количеству убийств боссов
 						</p>
 					</Link>
 					

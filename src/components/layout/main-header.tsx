@@ -29,6 +29,12 @@ export function MainHeader () {
 						>
 							Сравнение
 						</Link>
+						<Link
+							href='/watermelon'
+							className='rounded px-2 py-1 text-zinc-300 hover:bg-zinc-800 hover:text-white'
+						>
+							Поиск арбузов
+						</Link>
 					</nav>
 				</div>
 
